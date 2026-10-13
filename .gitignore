@@ -1,0 +1,27 @@
+# ===== Không commit tài nguyên nặng của lab =====
+*.iso
+*.vmdk
+*.vmem
+*.vmss
+*.vmsn
+*.vmx.lck/
+*.lck/
+*.log
+
+# Video / tài liệu nguồn (tải từ Google Drive, không đưa vào git)
+*.mp4
+*.mkv
+*.avi
+*.pdf
+*.zip
+*.rar
+*.7z
+
+# ===== Hệ điều hành =====
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ===== Tạm =====
+*.tmp
+*.bak

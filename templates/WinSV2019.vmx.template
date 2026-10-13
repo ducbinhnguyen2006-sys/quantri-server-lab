@@ -1,0 +1,43 @@
+.encoding = "UTF-8"
+config.version = "8"
+virtualHW.version = "19"
+displayName = "__VMNAME__"
+guestOS = "windows9srv-64"
+firmware = "bios"
+memsize = "4096"
+numvcpus = "2"
+cpuid.coresPerSocket = "2"
+
+scsi0.present = "TRUE"
+scsi0.virtualDev = "lsilogic"
+scsi0:0.present = "TRUE"
+scsi0:0.deviceType = "disk"
+scsi0:0.fileName = "__VMNAME__.vmdk"
+
+ide1:0.present = "TRUE"
+ide1:0.fileName = "__ISO__"
+ide1:0.deviceType = "cdrom-image"
+ide1:0.startConnected = "TRUE"
+
+ethernet0.present = "TRUE"
+ethernet0.connectionType = "nat"
+ethernet0.virtualDev = "e1000"
+ethernet0.addressType = "generated"
+
+usb.present = "TRUE"
+ehci.present = "TRUE"
+sound.present = "FALSE"
+floppy0.present = "FALSE"
+vmci0.present = "TRUE"
+
+mks.enable3d = "TRUE"
+svga.vramSize = "268435456"
+svga.guestBackedPrimaryAware = "TRUE"
+
+powerType.powerOff = "soft"
+powerType.powerOn = "soft"
+powerType.suspend = "soft"
+powerType.reset = "soft"
+
+extendedConfigFile = "__VMNAME__.vmxf"
+virtualHW.productCompatibility = "hosted"
