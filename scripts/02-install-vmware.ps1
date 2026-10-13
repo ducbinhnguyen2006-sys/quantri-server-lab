@@ -27,12 +27,22 @@ $Lab = $cfg.Lab
 # VMware cai vao C: (~1 GB) - kiem tra so qua
 Assert-FreeSpace -Path "C:\" -MinGB 2 -Force | Out-Null
 
+# Da cai VMware chua? -> bo qua
+$vmrunExisting = Join-Path $cfg.VmwareInstallDir "vmrun.exe"
+if (Test-Path -LiteralPath $vmrunExisting) {
+    Write-Host "VMware da cai san ($vmrunExisting) -> BO QUA buoc 02." -ForegroundColor Green
+    exit 0
+}
+
 # Tim file cai
 if (-not $ExePath) {
     $vmwareDir = Join-Path $Lab "vmware"
     $exeItem = Get-ChildItem -Path $vmwareDir -Filter "VMware-workstation-full-*.exe" -ErrorAction SilentlyContinue |
                Select-Object -First 1
     if ($exeItem) { $ExePath = $exeItem.FullName }
+}
+if (-not $ExePath) {
+    $ExePath = Find-LabFile -Lab $Lab -SourceDir $cfg.SourceDir -Pattern "*VMware-workstation*.exe"
 }
 
 if (-not $ExePath -or -not (Test-Path -LiteralPath $ExePath)) {
@@ -63,3 +73,5 @@ if ($found) {
 } else {
     Write-Host "Chua xac nhan duoc trong registry - kiem tra bang tay trong Add/Remove Programs." -ForegroundColor Yellow
 }
+
+exit 0

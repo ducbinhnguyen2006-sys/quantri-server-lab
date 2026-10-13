@@ -18,20 +18,27 @@ Domain / Join domain / DHCP / User-Group / Shadow Copies / GPO.
 2. Nếu người dùng muốn **làm thủ công** → hướng dẫn họ theo `docs/` (từng bước GUI).
 
 ## Trình tự thực thi (quan trọng — đúng thứ tự)
+> **Cách nhanh nhất:** chạy `scripts/install-all.ps1` — nó tự gọi lần lượt các bước dưới,
+> tự dừng ở chỗ cần UAC/reboot/GUI, và chạy tiếp bằng `-Resume`. Dùng `-DryRun -Unattended`
+> để chỉ kiểm tra. Bảng dưới là chi tiết từng bước nếu cần chạy tay.
+
 | Bước | File | Việc | Cần UAC / Reboot? |
 |---|---|---|---|
-| **0** | `scripts/00-preflight.ps1` | **Kiểm tra máy trước khi cài** (CPU ảo hoá, RAM, ổ đĩa, Python, mạng) + chọn ổ | Không |
-| 1 | `scripts/01-download-drive.ps1` | Tải bộ tài liệu từ Google Drive | Không |
-| 2 | `scripts/02-install-vmware.ps1` | Cài VMware Workstation 16.2.4 + key | **UAC (Yes)** |
+| **0** | `scripts/00-preflight.ps1` | **Kiểm tra máy + LẬP HỒ SƠ** (CPU ảo hoá, RAM, ổ đĩa, Python, mạng) + chọn ổ | Không |
+| 1 | `scripts/01-download-drive.ps1` | Tải tài liệu (`-Stage 1` trước, `-Stage 2` sau) | Không |
+| 2 | `scripts/02-install-vmware.ps1` | Cài VMware Workstation 16.2.4 + key (tự bỏ qua nếu đã cài) | **UAC (Yes)** |
 | 3 | `scripts/03-disable-hyperv-vbs.ps1` | **Tắt Hyper-V/VBS — mấu chốt chống lag** | **UAC + REBOOT** |
-| 4 | `scripts/04-create-vms.ps1` | Tạo 2 VM từ ISO | Không |
+| 4 | `scripts/04-create-vms.ps1` | Tạo 2 VM theo hồ sơ (RAM/vCPU/đĩa tự chỉnh); `-DryRun` để in ra | Không |
 | 5 | *người dùng* | Cài Windows trong từng VM (GUI) | — |
-| 6 | `scripts/05-optimize-vmx.ps1` | 3D accel, RAM, ngắt CD-ROM | Không |
+| 6 | `scripts/05-optimize-vmx.ps1` | 3D accel, RAM, ngắt CD-ROM (theo hồ sơ) | Không |
+| 6b | `scripts/06-cleanup-isos.ps1` | Xoá ISO + compact đĩa ảo (theo hồ sơ) | Không |
 | 7 | *người dùng* | Cài VMware Tools trong từng VM | — |
 | 8 | `scripts/99-verify.ps1` | Kiểm tra tổng thể sau khi cài | Không |
 | 9 | `docs/08-lab-domain-dhcp-gpo.md` | Làm bài lab theo video | — |
 
 > **Bước 0 là bắt buộc.** Trước khi cài, agent PHẢI chạy `00-preflight.ps1 -Save`.
+> Nó ghi **hồ sơ thích ứng** (Profile, VmDiskGB, VmRamWin10MB, VmRamServerMB, VmCpu,
+> OneVmAtATime) vào `lab.config.json` để các bước sau đọc lại.
 > Nếu kết quả `FAIL` (exit code 2) → **báo người dùng và DỪNG**, không cài tiếp.
 > Nếu `WARN` → giải thích cảnh báo và hỏi người dùng có muốn tiếp tục (thêm `-Force`).
 
@@ -58,9 +65,12 @@ Domain / Join domain / DHCP / User-Group / Shadow Copies / GPO.
   **KHÔNG hardcode đường dẫn** trong từng script.
 
 ## Quy tắc về ổ đĩa & dung lượng
-- Cần **≥ 60 GB trống** trên ổ chứa `$LAB` (khuyến nghị ≥ 80 GB). Xem `docs/09-dung-luong-va-o-dia.md`.
+- Preflight tự chọn **hồ sơ** theo dung lượng trống: ≥80 Đủ · 60–80 Thoải mái ·
+  42–60 Tiết kiệm · 32–42 Siêu tiết kiệm · <32 Không đủ. Chi tiết: `docs/10-thich-ung-may.md`.
+- **Không cứng nhắc ≥60 GB nữa** — máy chỉ 32–60 GB vẫn cài được (bỏ video, staged, đĩa nhỏ).
 - Chỉ **VMware** cài vào `C:`; ISO/VM/video nằm trong `$LAB`.
-- Trước khi tải tài liệu (13.5 GB), kiểm tra dung lượng ổ — script `01` đã có sẵn bước này.
+- Trước khi tải tài liệu, kiểm tra dung lượng ổ — script `01` đã có sẵn bước này.
+- Máy **chỉ 1 ổ** → dùng C: (kèm cảnh báo). Ổ ngoài → thêm `-IncludeRemovable`.
 
 ## Gotcha đã đúc kết (đọc `troubleshooting.md` để biết chi tiết)
 1. Hyper-V/VBS đang bật = **nguyên nhân lag số 1** → phải tắt.

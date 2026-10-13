@@ -18,6 +18,7 @@ $cfg = Get-LabConfig -Lab $Lab
 $Lab = $cfg.Lab
 
 Write-Host "=== 99 - Kiem tra tong the (sau khi cai) ===" -ForegroundColor Cyan
+Write-Host "Ho so: $($cfg.ProfileLabel) | dia ao $($cfg.VmDiskGB)GB | Win10=$($cfg.VmRamWin10MB)MB Server=$($cfg.VmRamServerMB)MB | 1VM moi lan=$($cfg.OneVmAtATime)" -ForegroundColor DarkGray
 $ok = $true
 
 # 1) Hypervisor / VBS
@@ -56,21 +57,17 @@ if (Test-Path -LiteralPath $vmrun) {
     $ok = $false
 }
 
-# 3) Tai lieu
+# 3) Tai lieu (ISO co the da bi xoa sau khi cai -> chi bao thong tin)
 Write-Host "`n[3] Bo tai lieu ($Lab)" -ForegroundColor Yellow
-$need = @(
-    (Join-Path $Lab "Windows10_full.iso"),
-    (Join-Path $Lab "Win SV 2019\Win SV 2019.iso"),
-    (Join-Path $Lab "vmware")
-)
-foreach ($p in $need) {
-    if (Test-Path -LiteralPath $p) {
-        Write-Host "  OK: $p" -ForegroundColor Green
-    } else {
-        Write-Host "  THIEU: $p" -ForegroundColor Red
-        $ok = $false
-    }
+foreach ($p in @('*Windows10*.iso','*SV*2019*.iso')) {
+    $f = Find-LabFile -Lab $Lab -Pattern $p
+    if ($f) { Write-Host "  OK: $f" -ForegroundColor Green }
+    else { Write-Host "  (khong con) $p - co the da xoa sau khi cai (script 06)." -ForegroundColor DarkGray }
 }
+$inst = Find-LabFile -Lab $Lab -Pattern "*VMware-workstation*.exe"
+if ($inst) { Write-Host "  OK: bo cai VMware ($inst)" -ForegroundColor Green }
+elseif (Test-Path -LiteralPath $vmrun) { Write-Host "  Da cai VMware - khong can file cai nua." -ForegroundColor Green }
+else { Write-Host "  THIEU: bo cai VMware va chua cai VMware." -ForegroundColor Yellow }
 
 # 4) VM + toi uu
 Write-Host "`n[4] May ao (.vmx)" -ForegroundColor Yellow
@@ -92,3 +89,5 @@ if ($ok) {
 } else {
     Write-Host "=== Con muc CHUA dat (xem dong do o tren) ===" -ForegroundColor Yellow
 }
+
+if ($ok) { exit 0 } else { exit 1 }

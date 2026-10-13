@@ -39,18 +39,20 @@ function Set-VmxKey {
     if (-not $found) {
         $out = @($out) + "$Key = `"$Value`""
     }
-    Set-Content -LiteralPath $Path -Value $out -Encoding UTF8
+    [System.IO.File]::WriteAllText($Path, (@($out) -join "`r`n"), (New-Object System.Text.UTF8Encoding($false)))
     Write-Host ("  {0} = {1}" -f $Key, $Value) -ForegroundColor DarkGray
 }
 
-# Cau hinh mong muon tung VM  (VRAM 256MB = 268435456 byte)
+# Cau hinh mong muon tung VM (RAM/vCPU tu ho so trong config; VRAM 256MB = 268435456)
 $targets = @(
     @{ Path = (Join-Path $Lab "VMs\Win10\Win10.vmx");
-       Keys = @{ "memsize"="6144"; "mks.enable3d"="TRUE"; "svga.vramSize"="268435456";
+       Keys = @{ "memsize"="$($cfg.VmRamWin10MB)"; "numvcpus"="$($cfg.VmCpu)"; "cpuid.coresPerSocket"="$($cfg.VmCpu)";
+                 "mks.enable3d"="TRUE"; "svga.vramSize"="268435456";
                  "svga.guestBackedPrimaryAware"="TRUE"; "ide1:0.startConnected"="FALSE";
                  "sound.present"="FALSE" } },
     @{ Path = (Join-Path $Lab "VMs\WinSV2019\WinSV2019.vmx");
-       Keys = @{ "memsize"="4096"; "mks.enable3d"="TRUE"; "svga.vramSize"="268435456";
+       Keys = @{ "memsize"="$($cfg.VmRamServerMB)"; "numvcpus"="$($cfg.VmCpu)"; "cpuid.coresPerSocket"="$($cfg.VmCpu)";
+                 "mks.enable3d"="TRUE"; "svga.vramSize"="268435456";
                  "svga.guestBackedPrimaryAware"="TRUE"; "ide1:0.startConnected"="FALSE";
                  "sound.present"="FALSE" } }
 )
@@ -86,3 +88,5 @@ try {
 } catch {
     Write-Host "Khong dat duoc power plan (bo qua)." -ForegroundColor DarkGray
 }
+
+exit 0

@@ -28,3 +28,4 @@ desktop.ini
 
 # ===== Cấu hình cá nhân (chứa đường dẫn máy bạn) =====
 lab.config.json
+lab.state.json

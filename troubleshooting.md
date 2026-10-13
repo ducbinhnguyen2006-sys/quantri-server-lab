@@ -11,6 +11,24 @@
 | `Chua co Python` / `gdown` | `.\scripts\00-preflight.ps1 -InstallDeps` (tự cài qua winget) rồi **mở lại terminal**. |
 | `Hyper-V/VBS dang BAT` | Bình thường, nhưng sẽ gây lag → chạy `03` rồi reboot. |
 | `Khong ket noi duoc drive.google.com` | Kiểm tra mạng/tường lửa; cần mạng để tải tài liệu. |
+| `RAM ... GB` (FAIL) | Máy < 8 GB không đủ. Cần thêm RAM hoặc dùng máy khác. |
+| Hồ sơ `Sieu tiet kiem` | Bình thường với máy yếu: bỏ video, tải từng phần, đĩa 40 GB, cài từng VM một. |
+
+## 0b. install-all dừng giữa chừng / chạy lại
+`install-all.ps1` lưu tiến độ vào `lab.state.json` và **tự bỏ qua bước đã xong**.
+- Sau **reboot** (bước 03): chạy lại `.\scripts\install-all.ps1 -Resume`.
+- Sau khi **cài xong 1 VM**: chạy lại như trên để tiếp tục.
+- Muốn làm lại từ đầu: thêm `-Reset`.
+- Muốn chỉ xem kế hoạch, không cài: `.\scripts\install-all.ps1 -DryRun -Unattended`.
+
+## 0c. Không có mạng / muốn dùng tài liệu đã tải sẵn
+Dùng chế độ offline:
+```powershell
+.\scripts\install-all.ps1 -SourceDir "D:\BoTaiLieu"
+# hoặc
+.\scripts\01-download-drive.ps1 -SourceDir "D:\BoTaiLieu"
+```
+Script kiểm tra đủ ISO/VMware trong `SourceDir` rồi bỏ qua bước tải.
 
 ## 1. VM cực kỳ lag / giật / "Just a moment" rất lâu
 **Nguyên nhân số 1:** Hyper-V/VBS đang bật trên host → VMware chạy chế độ ULM.

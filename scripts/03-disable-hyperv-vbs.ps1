@@ -72,3 +72,5 @@ if (-not $NoRestart) {
         Write-Host "Nho TU KHOI DONG LAI may de thay doi co hieu luc!" -ForegroundColor Red
     }
 }
+
+exit 0

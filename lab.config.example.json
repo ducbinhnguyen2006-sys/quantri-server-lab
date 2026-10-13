@@ -3,6 +3,17 @@
   "DataDrive": "",
   "VmwareInstallDir": "C:\\Program Files (x86)\\VMware\\VMware Workstation",
   "DriveFolderId": "1khCYAzXvKSkpeot1Rg7PG4A5wyjWqLGK",
-  "MinFreeGB": 60,
-  "RecommendedFreeGB": 80
+  "SourceDir": "",
+  "Profile": "Du",
+  "ProfileLabel": "Du",
+  "MinFreeGB": 80,
+  "RecommendedFreeGB": 80,
+  "SkipVideos": false,
+  "StagedDownload": false,
+  "CleanupIso": false,
+  "VmDiskGB": 60,
+  "VmRamWin10MB": 6144,
+  "VmRamServerMB": 4096,
+  "VmCpu": 2,
+  "OneVmAtATime": false
 }

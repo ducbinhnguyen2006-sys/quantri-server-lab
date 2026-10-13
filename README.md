@@ -17,10 +17,13 @@ Repo này có **2 cách làm**:
 | Hạng mục | Yêu cầu tối thiểu | Khuyến nghị |
 |---|---|---|
 | CPU | 4 nhân, có ảo hoá (VT-x/AMD-V) | 8 nhân trở lên |
-| RAM | 12 GB | **16–32 GB** |
-| Ổ trống | 40 GB | **60 GB+ (SSD/NVMe)** |
+| RAM | 8 GB (chạy 1 VM mỗi lần) / 12 GB | **16–32 GB** |
+| Ổ trống | 32 GB (hồ sơ Siêu tiết kiệm) | **80 GB+ (SSD/NVMe)** |
 | Hệ điều hành | Windows 10/11 64-bit | Windows 11 |
 | Phần mềm | opencode (nếu dùng Cách A) | — |
+
+> Repo **tự thích ứng** với cấu hình máy bạn (số ổ, dung lượng, RAM). Máy yếu vẫn cài được
+> ở hồ sơ **Tiết kiệm**. Chi tiết: [docs/10-thich-ung-may.md](docs/10-thich-ung-may.md).
 
 **Tài nguyên cần tải** (~13.5 GB) — xem [docs/01-tai-tai-lieu.md](docs/01-tai-tai-lieu.md):
 - VMware Workstation 16.2.4 (`vmware/`)
@@ -46,16 +49,25 @@ Repo này có **2 cách làm**:
 Nếu ổ đĩa của bạn không phải `E:`, hãy nói với opencode:
 > *"Dùng ổ D:\QuanTriServer thay vì E:\QuanTriServer."*
 
-### Hoặc chạy script bằng tay (không cần AI)
+### Hoặc chạy MỘT LỆNH (khuyến nghị)
 ```powershell
 # Mở PowerShell tại thư mục repo
+.\scripts\install-all.ps1            # tự chạy hết, dừng đúng chỗ cần bạn (UAC, reboot, cài GUI)
+```
+Chạy tiếp sau reboot / sau mỗi VM: `.\scripts\install-all.ps1 -Resume`.
+Chỉ kiểm tra & in kế hoạch (không cài): `.\scripts\install-all.ps1 -DryRun -Unattended`.
+
+### Hoặc chạy từng script bằng tay
+```powershell
 Set-Location .\scripts
-.\00-preflight.ps1 -Save    # kiểm tra máy + tự chọn ổ + ghi lab.config.json
-.\01-download-drive.ps1     # tải tài liệu (~13.5 GB)
-.\02-install-vmware.ps1     # sẽ tự hỏi UAC
+.\00-preflight.ps1 -Save    # kiểm tra máy + tự chọn ổ + ghi lab.config.json (kèm hồ sơ)
+.\01-download-drive.ps1     # tải tài liệu (Stage 1)
+.\02-install-vmware.ps1     # sẽ tự hỏi UAC (bỏ qua nếu đã cài)
 .\03-disable-hyperv-vbs.ps1 # sẽ tự hỏi UAC rồi yêu cầu REBOOT  <-- quan trọng nhất
 # --- khởi động lại máy, sau đó ---
-.\04-create-vms.ps1
+.\04-create-vms.ps1         # tạo VM theo hồ sơ (RAM/vCPU/đĩa tự chỉnh)
+# --- cài Windows trong VM (GUI) ---
+.\06-cleanup-isos.ps1 -Compact   # xoá ISO + thu hồi dung lượng
 .\99-verify.ps1
 ```
 
@@ -64,7 +76,8 @@ Set-Location .\scripts
 .\scripts\00-preflight.ps1
 ```
 Kiểm tra: Windows 64-bit, **CPU ảo hoá (VT-x/AMD-V)**, RAM, **ổ đĩa + dung lượng**, Python/gdown,
-Internet, Hyper-V/VBS. Kết quả `PASS`/`WARN`/`FAIL`. Nếu thiếu Python/gdown:
+Internet, Hyper-V/VBS; cảnh báo HDD/pin/antivirus; **ước tính thời gian tải**; tự **lập hồ sơ**.
+Kết quả `PASS`/`WARN`/`FAIL`. Nếu thiếu Python/gdown:
 ```powershell
 .\scripts\00-preflight.ps1 -InstallDeps -Save
 ```
@@ -73,10 +86,20 @@ Internet, Hyper-V/VBS. Kết quả `PASS`/`WARN`/`FAIL`. Nếu thiếu Python/gd
 
 - **Tự động chọn ổ trống nhiều nhất** (bỏ qua C:) — hoặc chỉ định: `-Lab "D:\QuanTriServer"`.
 - **Chỉ VMware** cài vào `C:` (~1 GB); còn lại (ISO, VM, video) nằm trong `$LAB`.
-- **Cần ≥ 60 GB trống** (khuyến nghị **≥ 80 GB**) trên ổ chứa `$LAB`.
-- Lựa chọn được ghi vào `lab.config.json` để mọi bước dùng chung.
+- Preflight chọn **hồ sơ** theo dung lượng trống:
 
-Chi tiết: [docs/09-dung-luong-va-o-dia.md](docs/09-dung-luong-va-o-dia.md).
+| Trống | Hồ sơ | Tự động |
+|---|---|---|
+| ≥ 80 GB | Đủ | Đĩa ảo 60 GB, 2 VM song song |
+| 60–80 GB | Thoải mái | Bỏ video |
+| 42–60 GB | Tiết kiệm | Bỏ video + tải staged + đĩa 40 GB + xoá ISO |
+| 32–42 GB | Siêu tiết kiệm | Như trên + cài từng VM một |
+| < 32 GB | Không đủ | Dừng, hướng dẫn dọn/đổi ổ |
+
+- RAM ít: tự đặt **chế độ 1 VM mỗi lần** (< 12 GB) và giảm RAM/vCPU của VM.
+- Lựa chọn ghi vào `lab.config.json` để mọi bước dùng chung.
+
+Chi tiết: [docs/09](docs/09-dung-luong-va-o-dia.md) · [docs/10](docs/10-thich-ung-may.md).
 
 ---
 
@@ -96,6 +119,7 @@ Chi tiết: [docs/09-dung-luong-va-o-dia.md](docs/09-dung-luong-va-o-dia.md).
 | 07 | [Tối ưu hiệu năng](docs/07-toi-uu-hieu-nang.md) | 3D, RAM, CD-ROM |
 | 08 | [Bài lab](docs/08-lab-domain-dhcp-gpo.md) | Domain/DHCP/GPO theo video |
 | 09 | [Dung lượng & chọn ổ](docs/09-dung-luong-va-o-dia.md) | Yêu cầu dung lượng, chọn ổ, config |
+| 10 | [Thích ứng mọi máy](docs/10-thich-ung-may.md) | Hồ sơ theo ổ/RAM, staged, offline |
 
 Gặp lỗi? Xem [troubleshooting.md](troubleshooting.md).
 
@@ -112,8 +136,17 @@ quantri-server-lab/
 ├── lab.config.example.json   # mẫu cấu hình (lab.config.json tự sinh, đã gitignore)
 ├── docs/                     # hướng dẫn thủ công từng bước
 ├── scripts/                  # script PowerShell tự động hoá
-│   ├── _common.ps1           # hàm dùng chung (config, chọn ổ, dung lượng)
-│   └── 00-preflight.ps1      # kiểm tra máy trước khi cài
+│   ├── _common.ps1           # hàm dùng chung (config, chọn ổ, dung lượng, hồ sơ)
+│   ├── 00-preflight.ps1      # kiểm tra máy + lập hồ sơ (thích ứng)
+│   ├── 01-download-drive.ps1 # tải tài liệu (staged / offline)
+│   ├── 02-install-vmware.ps1 # cài VMware WS 16.2.4
+│   ├── 03-disable-hyperv-vbs.ps1 # tắt Hyper-V/VBS (chống lag)
+│   ├── 04-create-vms.ps1     # tạo 2 VM theo hồ sơ
+│   ├── 05-optimize-vmx.ps1   # tối ưu .vmx (3D, CD-ROM, RAM)
+│   ├── 06-cleanup-isos.ps1   # xoá ISO + compact đĩa ảo
+│   ├── 99-verify.ps1         # kiểm tra tổng thể
+│   ├── install-all.ps1       # chạy MỘT LỆNH (tự động hoá tối đa)
+│   └── drive-files.json      # manifest ID file Drive (tự dò)
 └── templates/                # mẫu .vmx để tạo VM
 ```
 
