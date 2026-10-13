@@ -1,5 +1,8 @@
 # 01 — Tải bộ tài liệu (~13.5 GB)
 
+> **Trước khi tải:** chạy `.\scripts\00-preflight.ps1 -Save` để kiểm tra máy và chọn ổ chứa
+> tài liệu (cần **≥ 60 GB trống**, khuyến nghị ≥ 80 GB). Xem [09-dung-luong-va-o-dia.md](09-dung-luong-va-o-dia.md).
+
 ## Nguồn
 📁 Google Drive: https://drive.google.com/drive/folders/1khCYAzXvKSkpeot1Rg7PG4A5wyjWqLGK?usp=sharing
 

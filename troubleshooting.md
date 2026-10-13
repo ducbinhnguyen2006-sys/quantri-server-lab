@@ -1,5 +1,17 @@
 # Troubleshooting — Xử lý sự cố
 
+> **Mẹo:** chạy `.\scripts\00-preflight.ps1` trước để phát hiện sớm hầu hết lỗi bên dưới
+> (ảo hoá, RAM, ổ đĩa, Python/gdown, Hyper-V).
+
+## 0. Preflight báo FAIL / WARN — xử lý nhanh
+| Thông báo | Ý nghĩa & cách sửa |
+|---|---|
+| `Ao hoa (VT-x/AMD-V) DANG TAT` | Vào **BIOS/UEFI** bật `Intel VT-x` / `SVM Mode` / `AMD-V`. |
+| `O ... chi con ... GB` | Dọn ổ hoặc chạy `00-preflight.ps1 -Lab "D:\..." -Save` để đổi sang ổ khác. |
+| `Chua co Python` / `gdown` | `.\scripts\00-preflight.ps1 -InstallDeps` (tự cài qua winget) rồi **mở lại terminal**. |
+| `Hyper-V/VBS dang BAT` | Bình thường, nhưng sẽ gây lag → chạy `03` rồi reboot. |
+| `Khong ket noi duoc drive.google.com` | Kiểm tra mạng/tường lửa; cần mạng để tải tài liệu. |
+
 ## 1. VM cực kỳ lag / giật / "Just a moment" rất lâu
 **Nguyên nhân số 1:** Hyper-V/VBS đang bật trên host → VMware chạy chế độ ULM.
 - Kiểm tra: `Get-ComputerInfo -Property HyperVisorPresent` → nếu `True` là bị.
@@ -71,8 +83,10 @@ Chưa cài **VMware Tools** hoặc Tools chưa chạy. Cài lại Tools ([docs/0
 - Kiểm tra `gpresult /r` xem GPO có trong danh sách áp dụng không.
 
 ## 12. Hết dung lượng ổ đĩa
-- Đĩa ảo đặt ở ổ còn trống (E:). Dọn file tạm, xoá snapshot cũ.
-- Trong guest có thể bị đầy → `cleanmgr`, xoá `%temp%`.
+- Xem ngân sách dung lượng: [docs/09-dung-luong-va-o-dia.md](docs/09-dung-luong-va-o-dia.md).
+- Đổi sang ổ trống nhiều hơn: `.\scripts\00-preflight.ps1 -Lab "D:\QuanTriServer" -Save`.
+- Dọn file tạm, xoá snapshot cũ. Trong guest: `cleanmgr`, xoá `%temp%`.
+- Thu hồi khoảng trống đĩa thin: **VM → Settings → Hard Disk → Compact**.
 
 ## 13. Cần BẬT LẠI Hyper-V sau khi làm lab
 ```powershell

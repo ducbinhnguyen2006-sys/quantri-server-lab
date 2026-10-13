@@ -3,7 +3,7 @@
 .SYNOPSIS
     Cai VMware Workstation 16.2.4 (im lang) + nhap serial.
 .PARAMETER Lab
-    Thu muc chua bo tai lieu. Mac dinh E:\QuanTriServer
+    Thu muc chua bo tai lieu (ghi de cau hinh trong lab.config.json).
 .PARAMETER ExePath
     Duong dan tro truc tiep toi file cai (neu khac vi tri mac dinh).
 .PARAMETER Serial
@@ -11,13 +11,21 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Lab = "E:\QuanTriServer",
+    [string]$Lab,
     [string]$ExePath,
     [string]$Serial = "ZF3R0-FHED2-M80TY-8QYGC-NPKYF"
 )
 
 $ErrorActionPreference = "Stop"
+. "$PSScriptRoot\_common.ps1"
+
 Write-Host "=== 02 - Cai VMware Workstation 16.2.4 ===" -ForegroundColor Cyan
+
+$cfg = Get-LabConfig -Lab $Lab
+$Lab = $cfg.Lab
+
+# VMware cai vao C: (~1 GB) - kiem tra so qua
+Assert-FreeSpace -Path "C:\" -MinGB 2 -Force | Out-Null
 
 # Tim file cai
 if (-not $ExePath) {

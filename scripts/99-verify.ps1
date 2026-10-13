@@ -10,10 +10,14 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Lab = "E:\QuanTriServer"
+    [string]$Lab
 )
 
-Write-Host "=== 99 - Kiem tra tong the ===" -ForegroundColor Cyan
+. "$PSScriptRoot\_common.ps1"
+$cfg = Get-LabConfig -Lab $Lab
+$Lab = $cfg.Lab
+
+Write-Host "=== 99 - Kiem tra tong the (sau khi cai) ===" -ForegroundColor Cyan
 $ok = $true
 
 # 1) Hypervisor / VBS
@@ -41,7 +45,7 @@ try {
 
 # 2) VMware
 Write-Host "`n[2] VMware Workstation" -ForegroundColor Yellow
-$vmrun = "C:\Program Files (x86)\VMware\VMware Workstation\vmrun.exe"
+$vmrun = Join-Path $cfg.VmwareInstallDir "vmrun.exe"
 if (Test-Path -LiteralPath $vmrun) {
     $ver = (Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*",
                              "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |

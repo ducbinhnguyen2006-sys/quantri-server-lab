@@ -6,15 +6,20 @@
     CHI sua .vmx - phai chay KHI VM DA TAT va DA DONG VMware,
     neu khong VMware se ghi de lai.
 .PARAMETER Lab
-    Thu muc goc. Mac dinh E:\QuanTriServer
+    Thu muc goc (ghi de cau hinh trong lab.config.json).
 #>
 [CmdletBinding()]
 param(
-    [string]$Lab = "E:\QuanTriServer"
+    [string]$Lab
 )
 
 $ErrorActionPreference = "Stop"
+. "$PSScriptRoot\_common.ps1"
+
 Write-Host "=== 05 - Toi uu .vmx ===" -ForegroundColor Cyan
+
+$cfg = Get-LabConfig -Lab $Lab
+$Lab = $cfg.Lab
 
 # ---------- Helper: set mot key trong .vmx ----------
 function Set-VmxKey {

@@ -33,7 +33,7 @@
 
 ## Thứ tự thực hiện
 ```
-01 Tải tài liệu  →  02 Cài VMware  →  03 Tắt Hyper-V/VBS (+REBOOT)
-   →  04 Tạo VM  →  05 Cài Windows  →  06 VMware Tools
-   →  07 Tối ưu   →  08 Bài lab
+00 Kiểm tra máy (preflight)  →  01 Tải tài liệu  →  02 Cài VMware
+   →  03 Tắt Hyper-V/VBS (+REBOOT)  →  04 Tạo VM  →  05 Cài Windows
+   →  06 VMware Tools  →  07 Tối ưu  →  08 Bài lab  →  09 Dung lượng/ổ đĩa
 ```

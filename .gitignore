@@ -25,3 +25,6 @@ desktop.ini
 # ===== Tạm =====
 *.tmp
 *.bak
+
+# ===== Cấu hình cá nhân (chứa đường dẫn máy bạn) =====
+lab.config.json

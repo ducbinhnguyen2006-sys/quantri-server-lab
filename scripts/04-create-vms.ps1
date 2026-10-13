@@ -3,20 +3,33 @@
 .SYNOPSIS
     Tao 2 may ao (WinSV2019 + Win10) tu dong: tao dia ao + sinh .vmx.
 .PARAMETER Lab
-    Thu muc goc chua tai lieu + ISO. Mac dinh E:\QuanTriServer
+    Thu muc goc chua tai lieu + ISO (ghi de cau hinh trong lab.config.json).
 .PARAMETER DiskGB
     Dung luong dia ao moi VM. Mac dinh 60.
+.PARAMETER Force
+    Bo qua canh bao dung luong.
 #>
 [CmdletBinding()]
 param(
-    [string]$Lab = "E:\QuanTriServer",
-    [int]$DiskGB = 60
+    [string]$Lab,
+    [int]$DiskGB = 60,
+    [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
+. "$PSScriptRoot\_common.ps1"
+
 Write-Host "=== 04 - Tao 2 may ao ===" -ForegroundColor Cyan
 
-$vmHome = "C:\Program Files (x86)\VMware\VMware Workstation"
+$cfg = Get-LabConfig -Lab $Lab
+$Lab = $cfg.Lab
+
+# Du tru cho ~2 x (dia ao cua VM) - uoc luong thuc te ~2 x 15 GB sau khi cai, can trong >= min
+if (-not (Assert-FreeSpace -Path $Lab -MinGB ([int]$cfg.MinFreeGB) -Force:$Force)) {
+    exit 1
+}
+
+$vmHome = $cfg.VmwareInstallDir
 $vdisk  = Join-Path $vmHome "vmware-vdiskmanager.exe"
 if (-not (Test-Path -LiteralPath $vdisk)) {
     Write-Host "KHONG thay vmware-vdiskmanager.exe. Da cai VMware chua (script 02)?" -ForegroundColor Red

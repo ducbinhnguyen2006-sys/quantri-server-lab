@@ -48,16 +48,35 @@ Nếu ổ đĩa của bạn không phải `E:`, hãy nói với opencode:
 
 ### Hoặc chạy script bằng tay (không cần AI)
 ```powershell
-# Mở PowerShell (không cần Admin cho bước 1)
-$LAB = "E:\QuanTriServer"
+# Mở PowerShell tại thư mục repo
 Set-Location .\scripts
-.\01-download-drive.ps1
+.\00-preflight.ps1 -Save    # kiểm tra máy + tự chọn ổ + ghi lab.config.json
+.\01-download-drive.ps1     # tải tài liệu (~13.5 GB)
 .\02-install-vmware.ps1     # sẽ tự hỏi UAC
 .\03-disable-hyperv-vbs.ps1 # sẽ tự hỏi UAC rồi yêu cầu REBOOT  <-- quan trọng nhất
 # --- khởi động lại máy, sau đó ---
 .\04-create-vms.ps1
 .\99-verify.ps1
 ```
+
+### Kiểm tra máy trước khi cài (nên chạy trước)
+```powershell
+.\scripts\00-preflight.ps1
+```
+Kiểm tra: Windows 64-bit, **CPU ảo hoá (VT-x/AMD-V)**, RAM, **ổ đĩa + dung lượng**, Python/gdown,
+Internet, Hyper-V/VBS. Kết quả `PASS`/`WARN`/`FAIL`. Nếu thiếu Python/gdown:
+```powershell
+.\scripts\00-preflight.ps1 -InstallDeps -Save
+```
+
+## 2b. Cài vào ổ nào? Cần bao nhiêu dung lượng?
+
+- **Tự động chọn ổ trống nhiều nhất** (bỏ qua C:) — hoặc chỉ định: `-Lab "D:\QuanTriServer"`.
+- **Chỉ VMware** cài vào `C:` (~1 GB); còn lại (ISO, VM, video) nằm trong `$LAB`.
+- **Cần ≥ 60 GB trống** (khuyến nghị **≥ 80 GB**) trên ổ chứa `$LAB`.
+- Lựa chọn được ghi vào `lab.config.json` để mọi bước dùng chung.
+
+Chi tiết: [docs/09-dung-luong-va-o-dia.md](docs/09-dung-luong-va-o-dia.md).
 
 ---
 
@@ -76,6 +95,7 @@ Set-Location .\scripts
 | 06 | [VMware Tools](docs/06-vmware-tools.md) | Cài Tools (hết lag chuột) |
 | 07 | [Tối ưu hiệu năng](docs/07-toi-uu-hieu-nang.md) | 3D, RAM, CD-ROM |
 | 08 | [Bài lab](docs/08-lab-domain-dhcp-gpo.md) | Domain/DHCP/GPO theo video |
+| 09 | [Dung lượng & chọn ổ](docs/09-dung-luong-va-o-dia.md) | Yêu cầu dung lượng, chọn ổ, config |
 
 Gặp lỗi? Xem [troubleshooting.md](troubleshooting.md).
 
@@ -89,8 +109,11 @@ quantri-server-lab/
 ├── README.md                 # file này
 ├── KEYS.md                   # serial VMware + key Windows Server
 ├── troubleshooting.md        # xử lý sự cố
+├── lab.config.example.json   # mẫu cấu hình (lab.config.json tự sinh, đã gitignore)
 ├── docs/                     # hướng dẫn thủ công từng bước
 ├── scripts/                  # script PowerShell tự động hoá
+│   ├── _common.ps1           # hàm dùng chung (config, chọn ổ, dung lượng)
+│   └── 00-preflight.ps1      # kiểm tra máy trước khi cài
 └── templates/                # mẫu .vmx để tạo VM
 ```
 
